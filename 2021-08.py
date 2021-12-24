@@ -37,6 +37,7 @@ class Digit:
     # TODO: find a cleaner way to solve this Puzzle to create a dictionary
     def __init__(self, input_seq):
         self.sequence_remain = copy.deepcopy(input_seq)
+        # simpler: self.sequence_remain = input_seq[:]
         self.zero = ""
         self.two = ""
         self.three = ""

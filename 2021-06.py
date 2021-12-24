@@ -48,6 +48,7 @@ def part_two(processed):
     # as I did not deep-copied the array
     # we should've used:
     # timer_fish = copy.deepcopy(processed)
+    # or even simpler: timer_fish = processed[:]
     for i in range(256 - 80):
         new_fish = timer_fish[0]
         # shift the calendar
