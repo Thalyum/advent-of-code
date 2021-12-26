@@ -1,3 +1,6 @@
+# MIT License
+# Copyright (c) 2021 Paul-Erwan RIO
+
 import os
 
 from aocd.models import Puzzle

@@ -1,3 +1,6 @@
+# MIT License
+# Copyright (c) 2021 Paul-Erwan RIO
+
 import os
 
 import numpy as np
