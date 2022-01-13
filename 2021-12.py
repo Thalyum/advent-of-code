@@ -43,103 +43,52 @@ def process_input(input):
     #     "kj-HN",
     #     "kj-dc",
     # ]
-    processed = [line.split("-") for line in input]
-    return processed
+    graph = {}
+    for arc in [line.split("-") for line in input]:
+        if arc[0] not in graph:
+            graph[arc[0]] = []
+        graph[arc[0]].append(arc[1])
+        if arc[1] not in graph:
+            graph[arc[1]] = []
+        graph[arc[1]].append(arc[0])
+    return graph
 
 
-class Cave:
-    def __init__(self, name):
-        self.name = name
-        if name.isupper() and name != "start" and name != "end":
-            self.big_cave = True
-        else:
-            self.big_cave = False
-        self.passage_list = []
-
-    def add_path(self, cave):
-        if cave != self:
-            self.passage_list.append(cave)
-
-    def display_passage(self):
-        for cave in self.passage_list:
-            print(cave.name, end=",")
-        print("\b")
-
-
-class Maze:
-    def __init__(self, path_list):
-        self.cave_list = []
-        self.start = False
-        self.end = False
-        for path in path_list:
-            first_cave_name = path[0]
-            second_cave_name = path[1]
-            first_cave = self.search_for_cave(first_cave_name)
-            if not first_cave:
-                first_cave = Cave(first_cave_name)
-                if first_cave_name == "start" and not self.start:
-                    self.start = first_cave
-                elif first_cave_name == "end" and not self.end:
-                    self.end = first_cave
-                self.cave_list.append(first_cave)
-            second_cave = self.search_for_cave(second_cave_name)
-            if not second_cave:
-                second_cave = Cave(second_cave_name)
-                if second_cave_name == "start" and not self.start:
-                    self.start = second_cave
-                elif second_cave_name == "end" and not self.end:
-                    self.end = second_cave
-                self.cave_list.append(second_cave)
-            first_cave.add_path(second_cave)
-            second_cave.add_path(first_cave)
-
-    def search_for_cave(self, name):
-        for cave in self.cave_list:
-            if cave.name == name:
-                return cave
-        return False
-
-    def display_maze(self, cave_list=[], brief=False):
-        if not cave_list:
-            cave_list = self.cave_list
-        if not brief:
-            for cave in cave_list:
-                print("{}: ".format(cave.name), end="")
-                cave.display_passage()
-            print("---")
-        else:
-            for cave in cave_list:
-                print(cave.name, end=",")
-            print("\b")
-
-    def find_all_paths(self, current_cave=False, path_list=[]):
-        if not current_cave:
-            self.path_found = 0
-            current_cave = self.start
-            path_list = [current_cave]
-        for possible_cave in current_cave.passage_list:
-            if possible_cave == self.end:
-                # add last node
-                final_path_list = copy.deepcopy(path_list)
-                final_path_list.append(possible_cave)
-                # print path found
-                # self.display_maze(final_path_list, brief=True)
-                self.path_found += 1
+def iterate_path_maze(graph, path_list):
+    new_path_list = []
+    for path in path_list:
+        last_cave = path[-1]
+        if last_cave == 'end':
+            # path finished, keep it
+            new_path_list.append(path)
+            continue
+        for possible_cave in graph[last_cave]:
+            if possible_cave == 'start':
+                # we do not pass through start cave twice
                 continue
-            is_crossed = [possible_cave.name == cave.name for cave in path_list]
-            if True in is_crossed and not possible_cave.big_cave:
+            elif possible_cave.islower() and possible_cave in path:
+                # forget this path, as we do not cross small caves twice
                 continue
-            new_path_list = copy.deepcopy(path_list)
-            new_path_list.append(possible_cave)
-            self.find_all_paths(possible_cave, new_path_list)
+            else:
+                # register possible path
+                new_path = copy.deepcopy(path)
+                new_path.append(possible_cave)
+                new_path_list.append(new_path)
+    return new_path_list
+
+
+def is_iteration_finished(path_list):
+    return all([path[-1] == 'end' for path in path_list])
 
 
 def part_one(processed):
     """Solve puzzle's part one."""
-    maze = Maze(processed)
-    maze.display_maze()
-    maze.find_all_paths()
-    output = maze.path_found
+    path_list = []
+    path_list.append(['start'])
+    while not is_iteration_finished(path_list):
+        path_list = iterate_path_maze(processed, path_list)
+    # print(path_list)
+    output = len(path_list)
     print("part one: {}".format(output))
 
 
