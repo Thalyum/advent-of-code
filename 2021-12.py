@@ -58,12 +58,12 @@ def iterate_path_maze(graph, path_list):
     new_path_list = []
     for path in path_list:
         last_cave = path[-1]
-        if last_cave == 'end':
+        if last_cave == "end":
             # path finished, keep it
             new_path_list.append(path)
             continue
         for possible_cave in graph[last_cave]:
-            if possible_cave == 'start':
+            if possible_cave == "start":
                 # we do not pass through start cave twice
                 continue
             elif possible_cave.islower() and possible_cave in path:
@@ -82,13 +82,13 @@ def iterate_path_maze_part2(graph, path_list, small_cave_ok):
     new_small_cave_ok = []
     for (index, path) in enumerate(path_list):
         last_cave = path[-1]
-        if last_cave == 'end':
+        if last_cave == "end":
             # path finished, keep it
             new_path_list.append(path)
             new_small_cave_ok.append(small_cave_ok[index])
             continue
         for possible_cave in graph[last_cave]:
-            if possible_cave == 'start':
+            if possible_cave == "start":
                 # we do not pass through start cave twice
                 continue
             elif possible_cave.islower() and possible_cave in path:
@@ -110,13 +110,13 @@ def iterate_path_maze_part2(graph, path_list, small_cave_ok):
 
 
 def is_iteration_finished(path_list):
-    return all([path[-1] == 'end' for path in path_list])
+    return all([path[-1] == "end" for path in path_list])
 
 
 def part_one(processed):
     """Solve puzzle's part one."""
     path_list = []
-    path_list.append(['start'])
+    path_list.append(["start"])
     while not is_iteration_finished(path_list):
         path_list = iterate_path_maze(processed, path_list)
     # print(path_list)
@@ -128,10 +128,12 @@ def part_two(processed):
     """Solve puzzle's part two."""
     path_list = []
     small_cave_ok = []
-    path_list.append(['start'])
+    path_list.append(["start"])
     small_cave_ok.append(True)
     while not is_iteration_finished(path_list):
-        (path_list, small_cave_ok) = iterate_path_maze_part2(processed, path_list, small_cave_ok)
+        (path_list, small_cave_ok) = iterate_path_maze_part2(
+            processed, path_list, small_cave_ok
+        )
     output = "N/A"
     # print(path_list)
     output = len(path_list)

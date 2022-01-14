@@ -29,13 +29,13 @@ def process_input(input):
     #     "fold along x=1"
     # ]
     for line in input:
-        if 'fold' in line:
+        if "fold" in line:
             instructions.append(line.removeprefix("fold along "))
         elif not line:
             continue
         else:
             coord = [int(a) for a in line.split(",")]
-            coord_dict = {'x': coord[0], 'y': coord[1]}
+            coord_dict = {"x": coord[0], "y": coord[1]}
             array.append(coord_dict)
     return (array, instructions)
 
@@ -43,10 +43,10 @@ def process_input(input):
 def part_one(array, instructions):
     """Solve puzzle's part one."""
     dimension = instructions[0].split("=")[0]
-    if dimension == 'x':
-        other_dimension = 'y'
+    if dimension == "x":
+        other_dimension = "y"
     else:
-        other_dimension = 'x'
+        other_dimension = "x"
     line_number = int(instructions[0].split("=")[1])
     new_array = []
     for coord in array:
@@ -73,10 +73,10 @@ def part_two(array, instructions):
     """Solve puzzle's part two."""
     for instruction in instructions:
         dimension = instruction.split("=")[0]
-        if dimension == 'x':
-            other_dimension = 'y'
+        if dimension == "x":
+            other_dimension = "y"
         else:
-            other_dimension = 'x'
+            other_dimension = "x"
         line_number = int(instruction.split("=")[1])
         new_array = []
         for coord in array:
@@ -98,9 +98,9 @@ def part_two(array, instructions):
         array = new_array
     # print the code
     # dirty code
-    tmp = np.zeros((10,50), dtype=int)
+    tmp = np.zeros((10, 50), dtype=int)
     for coord in array:
-        tmp[coord['y']][coord['x']] = 1
+        tmp[coord["y"]][coord["x"]] = 1
     for row in tmp:
         for column in row:
             if column:
