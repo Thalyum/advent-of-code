@@ -3,10 +3,12 @@
 
 import copy
 import os
-from collections import Counter, deque
+from collections import Counter, defaultdict
 
 import numpy as np
 from aocd.models import Puzzle
+
+last_letter = ""
 
 
 def load_inputs():
@@ -20,43 +22,88 @@ def load_inputs():
 
 def process_input(input):
     """Puzzle-specific input processing."""
+    global last_letter
+    state = {}
     template = input[0]
+    last_letter = template[-1]
     pair_list = []
     for pair in input[2:]:
         pair_list.append(pair.split(" -> "))
-    return (template, pair_list)
-
-
-def compute_next_template(template, pair_list):
-    next_template = []
-    first_char = template[0]
+    # init state from template
     for c in range(len(template) - 1):
-        second_char = template[c + 1]
-        next_template.append(first_char)
-        for pair in pair_list:
-            if first_char == pair[0][0] and second_char == pair[0][1]:
-                next_template.append(pair[1])
-        first_char = second_char
-    next_template.append(second_char)
-    return next_template
+        couple = template[c : c + 2]
+        if couple not in state:
+            state[couple] = {"current": 1, "next": 0, "op": []}
+    # init state from pair list
+    for p in pair_list:
+        couple = p[0]
+        middle = p[1]
+        if couple not in state:
+            state[couple] = {"current": 0, "next": 0, "op": []}
+        first_new_couple = couple[0] + middle
+        second_new_couple = middle + couple[1]
+        if first_new_couple not in state:
+            state[first_new_couple] = {"current": 0, "next": 0, "op": []}
+        if second_new_couple not in state:
+            state[second_new_couple] = {"current": 0, "next": 0, "op": []}
+        state[couple]["op"].append(first_new_couple)
+        state[couple]["op"].append(second_new_couple)
+    return state
 
 
 def part_one(processed):
     """Solve puzzle's part one."""
-    (template, pair_list) = processed
     for _ in range(10):
-        template = compute_next_template(template, pair_list)
-    count = Counter(template).most_common()
+        for couple in processed:
+            # if list of operation is empty
+            # this couple will not 'evolve' anymore
+            if processed[couple]["op"]:
+                current = processed[couple]["current"]
+                for op in processed[couple]["op"]:
+                    processed[op]["next"] += current
+                # the couple is 'consumed' into its next op
+                processed[couple]["current"] = 0
+        # current <- next
+        for couple in processed:
+            processed[couple]["current"] = processed[couple]["next"]
+            processed[couple]["next"] = 0
+    # count letters: count the first letter of each couple
+    counter = defaultdict(int)
+    for c in processed:
+        counter[c[0]] += processed[c]["current"]
+    # do not forget to count the last letter
+    counter[last_letter] += 1
+    count = Counter(counter).most_common()
+    # most common - least common
     output = count[0][1] - count[-1][1]
     print("part one: {}".format(output))
 
 
 def part_two(processed):
     """Solve puzzle's part two."""
-    (template, pair_list) = processed
-    for _ in range(40):
-        template = compute_next_template(template, pair_list)
-    count = Counter(template).most_common()
+    # we already did 10 iteration in first part
+    for _ in range(30):
+        for couple in processed:
+            # if list of operation is empty
+            # this couple will not 'evolve' anymore
+            if processed[couple]["op"]:
+                current = processed[couple]["current"]
+                for op in processed[couple]["op"]:
+                    processed[op]["next"] += current
+                # the couple is 'consumed' into its next op
+                processed[couple]["current"] = 0
+        # current <- next
+        for couple in processed:
+            processed[couple]["current"] = processed[couple]["next"]
+            processed[couple]["next"] = 0
+    # count letters: count the first letter of each couple
+    counter = defaultdict(int)
+    for c in processed:
+        counter[c[0]] += processed[c]["current"]
+    # do not forget to count the last letter
+    counter[last_letter] += 1
+    count = Counter(counter).most_common()
+    # most common - least common
     output = count[0][1] - count[-1][1]
     print("part two: {}".format(output))
 
