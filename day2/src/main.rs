@@ -25,17 +25,14 @@ const BLUE_LIMIT: i32 = 14;
 
 fn get_input() -> String {
     // let s = String::from(
-    //         "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
+    //     "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
     // Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
     // Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
     // Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
     // Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
     // ",
-    //     );
+    // );
     let s = fs::read_to_string("input/day2_1").unwrap();
-    //     let s = String::from(
-    //     );
-    // let s = fs::read_to_string("input/day2_2").unwrap();
 
     s
 }
@@ -90,10 +87,14 @@ fn main() {
         }
     }
 
+    // part 1
     let invalid = sum_invalid_games(&parsed);
     // sum of valid games = sum of number of games - sum of invalid games
     let o: i32 = parsed.iter().map(|(id, _)| id).sum::<i32>() - invalid;
-    println!("{}", o);
+    println!("part 1: {}", o);
+    // part 2
+    let power = game_power(&parsed);
+    println!("part 2: {}", power);
 }
 
 fn process_turn_singleton(s: pest::iterators::Pair<'_, Rule>) -> (Colors, i32) {
@@ -111,8 +112,8 @@ fn process_turn_singleton(s: pest::iterators::Pair<'_, Rule>) -> (Colors, i32) {
     (color, count.parse::<i32>().unwrap())
 }
 
-fn sum_invalid_games(game_data: &HashMap<i32, Vec<Vec<(Colors, i32)>>>) -> i32 {
-    game_data
+fn sum_invalid_games(games_data: &HashMap<i32, Vec<Vec<(Colors, i32)>>>) -> i32 {
+    games_data
         .iter()
         .map(|(&game_id, game_data)| {
             if game_data.iter().any(|turn_data| {
@@ -127,6 +128,37 @@ fn sum_invalid_games(game_data: &HashMap<i32, Vec<Vec<(Colors, i32)>>>) -> i32 {
             } else {
                 0
             }
+        })
+        .sum()
+}
+
+fn game_power(games_data: &HashMap<i32, Vec<Vec<(Colors, i32)>>>) -> i32 {
+    games_data
+        .iter()
+        .map(|(_, game_data)| {
+            let f: Vec<&(Colors, i32)> = game_data.into_iter().flatten().collect();
+            let mut blue_max = 0;
+            let mut green_max = 0;
+            let mut red_max = 0;
+            f.iter().for_each(|(color, count)| match color {
+                Colors::Blue => {
+                    if count > &blue_max {
+                        blue_max = *count;
+                    }
+                }
+                Colors::Red => {
+                    if count > &red_max {
+                        red_max = *count;
+                    }
+                }
+                Colors::Green => {
+                    if count > &green_max {
+                        green_max = *count;
+                    }
+                }
+                _ => unreachable!(),
+            });
+            blue_max * green_max * red_max
         })
         .sum()
 }
