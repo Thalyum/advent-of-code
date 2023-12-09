@@ -34,10 +34,18 @@ fn main() {
 fn part_one_2(array: &Vec<Vec<char>>, height: i32, width: i32) {
     let mut grid = array.clone();
     // detect numbers close to a symbol, and paint them red in a grid
+    let mut mul = 0;
     for i in 0..height {
         for j in 0..width {
             // find symbols
-            if !grid[i as usize][j as usize].is_numeric() && array[i as usize][j as usize] != '.' {
+            if !grid[i as usize][j as usize].is_numeric() && grid[i as usize][j as usize] != '.' {
+                let gear = if grid[i as usize][j as usize] == '*' {
+                    true
+                } else {
+                    false
+                };
+                let mut gear_count = 0;
+                let mut gear_list = [(-1, -1); 2];
                 // check in all direction, even diagonally
                 for (ni, nj) in [
                     (i - 1, j - 1),
@@ -51,8 +59,25 @@ fn part_one_2(array: &Vec<Vec<char>>, height: i32, width: i32) {
                 ] {
                     if (0 <= ni) && (ni < height) && (0 <= nj) && (nj < width) {
                         if grid[ni as usize][nj as usize].is_numeric() {
+                            if gear {
+                                if gear_count < 2 {
+                                    let mut next = 1;
+                                    while nj - next >= 0
+                                        && grid[ni as usize][(nj - next) as usize].is_numeric()
+                                    {
+                                        grid[ni as usize][(nj - next) as usize] = 'X';
+                                        next += 1;
+                                    }
+                                    let index = (ni, nj - next + 1);
+                                    if !gear_list.contains(&index) {
+                                        gear_list[gear_count] = index;
+                                    }
+                                }
+                                gear_count += 1;
+                            }
                             // paint number red: found digit + rest of the number on the same line
                             grid[ni as usize][nj as usize] = 'X';
+                            // paint downstream
                             let mut next = 1;
                             while nj + next < width
                                 && grid[ni as usize][(nj + next) as usize].is_numeric()
@@ -60,6 +85,7 @@ fn part_one_2(array: &Vec<Vec<char>>, height: i32, width: i32) {
                                 grid[ni as usize][(nj + next) as usize] = 'X';
                                 next += 1;
                             }
+                            // paint upstream
                             next = 1;
                             while nj - next >= 0
                                 && grid[ni as usize][(nj - next) as usize].is_numeric()
@@ -69,6 +95,23 @@ fn part_one_2(array: &Vec<Vec<char>>, height: i32, width: i32) {
                             }
                         }
                     }
+                }
+                if gear && gear_count == 2 {
+                    let gear1 = array[gear_list[0].0 as usize]
+                        .iter()
+                        .skip(gear_list[0].1 as usize)
+                        .take_while(|s| s.is_numeric())
+                        .collect::<String>()
+                        .parse::<i32>()
+                        .unwrap();
+                    let gear2 = array[gear_list[1].0 as usize]
+                        .iter()
+                        .skip(gear_list[1].1 as usize)
+                        .take_while(|s| s.is_numeric())
+                        .collect::<String>()
+                        .parse::<i32>()
+                        .unwrap();
+                    mul += gear1 * gear2;
                 }
             }
         }
@@ -105,6 +148,7 @@ fn part_one_2(array: &Vec<Vec<char>>, height: i32, width: i32) {
         }
     }
     println!("part 1 (v2): {}", sum);
+    println!("part 2 (v2): {}", mul);
 }
 
 fn part_one(array: &Vec<Vec<char>>, height: i32, width: i32) {
